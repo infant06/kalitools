@@ -1,6 +1,4 @@
-# kalitools
-Install Kalilinux tools with icons in Ubuntu or other distros
-Here's a sample `README.md` that explains how to use your `kali.py` script, how to install dependencies, and what the script does. You can customize it further if needed:
+
 
 ```markdown
 # Kali Tool Installer
