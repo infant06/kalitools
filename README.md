@@ -1,133 +1,102 @@
 # kalitools
 Install Kalilinux tools with icons in Ubuntu or other distros
+Here's a sample `README.md` that explains how to use your `kali.py` script, how to install dependencies, and what the script does. You can customize it further if needed:
 
-Here is the python code
+```markdown
+# Kali Tool Installer
 
-import os
-import subprocess
-import sys
+This script (`kali.py`) automates the process of installing Kali Linux tools on a Debian-based system, such as Ubuntu. It adds the Kali Linux repository, installs necessary GnuPG keys, updates the package list, and installs the specified tool from the Kali repository. Additionally, it creates a `.desktop` entry for the installed tool to make it easily accessible from the application launcher.
 
-def run_command(command):
-    """Runs a shell command and checks for errors."""
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
-    
-    if process.returncode != 0:
-        print(f"Error: {stderr.decode('utf-8')}")
-        return False
-    else:
-        print(stdout.decode('utf-8'))
-        return True
+## Requirements
 
-def add_kali_repository():
-    """Adds the Kali Linux repository to the sources list."""
-    print("Adding Kali repository to /etc/apt/sources.list.d/kali.list...")
-    command = "sudo sh -c \"echo 'deb https://http.kali.org/kali kali-rolling main non-free contrib' > /etc/apt/sources.list.d/kali.list\""
-    return run_command(command)
+Before running the script, ensure you have the following:
 
-def install_gnupg():
-    """Installs GnuPG package."""
-    print("Installing GnuPG...")
-    command = "sudo apt install -y gnupg"
-    return run_command(command)
+- Python 3.x
+- `sudo` privileges on the system
+- An internet connection
+- A Debian-based system (e.g., Ubuntu)
 
-def add_kali_public_key():
-    """Downloads and adds Kali Linux public key."""
-    print("Adding Kali public key...")
-    commands = [
-        "wget 'https://archive.kali.org/archive-key.asc'",
-        "sudo apt-key add archive-key.asc"
-    ]
-    for command in commands:
-        if not run_command(command):
-            return False
-    return True
+## Installation
 
-def set_kali_package_priority():
-    """Sets Kali Linux package priority to avoid automatic installation."""
-    print("Setting Kali package priority...")
-    command = """
-    sudo sh -c "echo 'Package: *' > /etc/apt/preferences.d/kali.pref;
-    echo 'Pin: release a=kali-rolling' >> /etc/apt/preferences.d/kali.pref;
-    echo 'Pin-Priority: 50' >> /etc/apt/preferences.d/kali.pref"
-    """
-    return run_command(command)
+1. Clone this repository or download the script.
 
-def update_packages():
-    """Updates the package list."""
-    print("Updating package list...")
-    command = "sudo apt update"
-    return run_command(command)
+```bash
+git clone https://github.com/infant06/kalitools.git
+cd kalitools
+```
 
-def install_tool(tool_name):
-    """Installs the specified tool from the Kali Linux repository."""
-    print(f"Installing {tool_name}...")
-    command = f"sudo apt install -y -t kali-rolling {tool_name}"
-    return run_command(command)
+2. Make sure Python 3 is installed. You can check by running:
 
-def create_desktop_entry(tool_name):
-    """Creates a .desktop entry for the installed tool."""
-    print(f"Creating desktop entry for {tool_name}...")
-    desktop_entry = f"""[Desktop Entry]
-Version=1.0
-Name={tool_name}
-Comment={tool_name} Web Application Security Testing
-Exec={tool_name}
-Icon={tool_name}
-Terminal=false
-Type=Application
-Categories=Development;Security;
-"""
-    desktop_path = f"/usr/share/applications/{tool_name}.desktop"
-    try:
-        with open(desktop_path, "w") as f:
-            f.write(desktop_entry)
-        os.chmod(desktop_path, 0o755)
-        print(f"Desktop entry for {tool_name} created successfully.")
-        return True
-    except Exception as e:
-        print(f"Error creating desktop entry for {tool_name}: {e}")
-        return False
+```bash
+python3 --version
+```
 
-def main():
-    """Main function to execute the setup."""
-    if len(sys.argv) != 2:
-        print("Usage: sudo python3 kali.py <tool_name>")
-        return
+3. Install any required dependencies, if they are not already installed (e.g., `wget`).
 
-    tool_name = sys.argv[1]
+```bash
+sudo apt update
+sudo apt install -y wget
+```
 
-    print(f"Setting up Kali tools for: {tool_name}")
-    
-    # Check if we need to add the Kali repo (Only do it once)
-    if not os.path.exists("/etc/apt/sources.list.d/kali.list"):
-        if not add_kali_repository():
-            print("Failed to add Kali repository.")
-            return
-        if not install_gnupg():
-            print("Failed to install GnuPG.")
-            return
-        if not add_kali_public_key():
-            print("Failed to add Kali public key.")
-            return
-        if not set_kali_package_priority():
-            print("Failed to set Kali package priority.")
-            return
-        if not update_packages():
-            print("Failed to update packages.")
-            return
+## Usage
 
-    # Install the requested tool
-    if not install_tool(tool_name):
-        print(f"Failed to install {tool_name}.")
-        return
-    
-    # Create a desktop entry for the tool
-    if not create_desktop_entry(tool_name):
-        print(f"Failed to create desktop entry for {tool_name}.")
-        return
+To run the script, use the following command:
 
-    print(f"{tool_name} has been installed and should appear in the application launcher.")
+```bash
+sudo python3 kali.py <tool_name>
+```
 
-if __name__ == "__main__":
-    main()
+### Parameters:
+
+- `<tool_name>`: The name of the Kali Linux tool you want to install (e.g., `burpsuite`).
+
+For example, to install Burp Suite:
+
+```bash
+sudo python3 kali.py burpsuite
+```
+
+This command will:
+
+1. Add the Kali Linux repository to your system.
+2. Install the GnuPG key to authenticate Kali Linux packages.
+3. Install the specified tool (e.g., Burp Suite) from the Kali repository.
+4. Create a `.desktop` entry for easy access from your application menu.
+
+### Available Tools:
+
+You can install any tool available in the Kali Linux repository, such as:
+
+- `burpsuite`
+- `nmap`
+- `aircrack-ng`
+
+For a complete list of available tools, visit [Kali Linux Tools](https://tools.kali.org/tools-listing).
+
+## Script Overview
+
+1. **Add Kali Repository**: Adds the Kali Linux repository to the system to allow installation of Kali tools.
+2. **Install GnuPG**: Installs the GnuPG package required to authenticate the Kali repository.
+3. **Add Kali Public Key**: Downloads and installs the Kali public key for package verification.
+4. **Set Package Priority**: Sets the Kali Linux package priority to avoid interfering with existing system packages.
+5. **Install Tool**: Installs the specified tool from the Kali repository.
+6. **Create Desktop Entry**: Creates a `.desktop` entry for the tool so it appears in the application launcher.
+
+## Troubleshooting
+
+- If you encounter any issues with missing dependencies, make sure to update your system:
+
+```bash
+sudo apt update && sudo apt upgrade
+```
+
+- If the script fails to execute, ensure you have proper permissions (`sudo`) and that your system is compatible with the Kali repository.
+
+## License
+
+This project is licensed under the MIT License .
+```
+
+---
+
+You can replace `"yourusername"` with your actual GitHub username in the repository clone command and also update the tool names or any other details as necessary. Let me know if you'd like further modifications!
