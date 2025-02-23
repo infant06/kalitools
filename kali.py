@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import time
 
 def run_command(command):
     """Runs a shell command and checks for errors."""
@@ -73,7 +74,11 @@ Terminal=false
 Type=Application
 Categories=Development;Security;
 """
-    desktop_path = f"/usr/share/applications/{tool_name}.desktop"
+    # Create a folder for Kali tools inside the app launcher directory
+    app_launcher_dir = "/usr/share/applications/kali_tools"
+    os.makedirs(app_launcher_dir, exist_ok=True)
+    
+    desktop_path = f"{app_launcher_dir}/{tool_name}.desktop"
     try:
         with open(desktop_path, "w") as f:
             f.write(desktop_entry)
@@ -84,6 +89,26 @@ Categories=Development;Security;
         print(f"Error creating desktop entry for {tool_name}: {e}")
         return False
 
+def show_loading_animation():
+    """Displays a loading animation (spinner)."""
+    animation = ['|', '/', '-', '\\']
+    for _ in range(30):  # Show animation for 30 iterations
+        for frame in animation:
+            sys.stdout.write(f"\rInstalling {frame}   ")
+            sys.stdout.flush()
+            time.sleep(0.1)
+
+def print_logo():
+    """Displays a logo for Kali Tools."""
+    logo = """
+    K   K    AAAAA  L       III    TTTTT  OOO   OOO   L       SSS
+    K  K    A   A  L        I       T   O   O O   O  L      S
+    KKK     AAAAA  L        I       T   O   O O   O  L       SSS
+    K  K    A   A  L        I       T   O   O O   O  L          S
+    K   K   A   A  LLLLL   III      T    OOO   OOO   LLLLL  SSS
+    """
+    print(logo)
+
 def main():
     """Main function to execute the setup."""
     if len(sys.argv) != 2:
@@ -92,6 +117,9 @@ def main():
 
     tool_name = sys.argv[1]
 
+    # Print the KaliTools logo
+    print_logo()
+    
     print(f"Setting up Kali tools for: {tool_name}")
     
     # Check if we need to add the Kali repo (Only do it once)
@@ -112,6 +140,9 @@ def main():
             print("Failed to update packages.")
             return
 
+    # Show loading animation while installing
+    show_loading_animation()
+
     # Install the requested tool
     if not install_tool(tool_name):
         print(f"Failed to install {tool_name}.")
@@ -122,7 +153,7 @@ def main():
         print(f"Failed to create desktop entry for {tool_name}.")
         return
 
-    print(f"{tool_name} has been installed and should appear in the application launcher.")
+    print(f"{tool_name} has been installed and should appear in the application launcher under 'Kali Tools'.")
 
 if __name__ == "__main__":
     main()
