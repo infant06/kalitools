@@ -19,21 +19,19 @@ def run_command(command):
 def add_kali_repository():
     """Adds the Kali Linux repository to the sources list."""
     print("Adding Kali repository to /etc/apt/sources.list.d/kali.list...")
-    command = "sudo sh -c \"echo 'deb https://http.kali.org/kali kali-rolling main non-free contrib' > /etc/apt/sources.list.d/kali.list\""
+    command = "echo 'deb http://http.kali.org/kali kali-rolling main non-free contrib' | sudo tee /etc/apt/sources.list.d/kali.list"
     return run_command(command)
 
 def install_gnupg():
     """Installs GnuPG package."""
     print("Installing GnuPG...")
-    command = "sudo apt install -y gnupg"
-    return run_command(command)
+    return run_command("sudo apt install -y gnupg")
 
 def add_kali_public_key():
-    """Downloads and adds Kali Linux public key."""
+    """Adds Kali Linux public key using GPG (since apt-key is deprecated)."""
     print("Adding Kali public key...")
     commands = [
-        "wget 'https://archive.kali.org/archive-key.asc'",
-        "sudo apt-key add archive-key.asc"
+        "wget -qO - https://archive.kali.org/archive-key.asc | sudo tee /usr/share/keyrings/kali-archive-keyring.gpg >/dev/null"
     ]
     for command in commands:
         if not run_command(command):
@@ -53,42 +51,73 @@ def set_kali_package_priority():
 def update_packages():
     """Updates the package list."""
     print("Updating package list...")
-    command = "sudo apt update"
-    return run_command(command)
+    return run_command("sudo apt update")
 
 def install_tool(tool_name):
     """Installs the specified tool from the Kali Linux repository."""
     print(f"Installing {tool_name}...")
-    command = f"sudo apt install -y -t kali-rolling {tool_name}"
-    return run_command(command)
+    return run_command(f"sudo apt install -y -t kali-rolling {tool_name}")
+
+def create_desktop_entry(tool_name):
+    """Creates a .desktop entry for the installed tool."""
+    print(f"Creating desktop entry for {tool_name}...")
+
+    desktop_entry = f"""[Desktop Entry]
+Version=1.0
+Name={tool_name}
+Comment={tool_name} - Kali Linux Security Tool
+Exec={tool_name}
+Icon={tool_name}
+Terminal=false
+Type=Application
+Categories=Development;Security;
+"""
+    app_launcher_dir = "/usr/share/applications/kali_tools"
+    os.makedirs(app_launcher_dir, exist_ok=True)
+    
+    desktop_path = f"{app_launcher_dir}/{tool_name}.desktop"
+    try:
+        with open(desktop_path, "w") as f:
+            f.write(desktop_entry)
+        os.chmod(desktop_path, 0o755)
+        print(f"Desktop entry for {tool_name} created successfully.")
+        return True
+    except Exception as e:
+        print(f"Error creating desktop entry for {tool_name}: {e}")
+        return False
 
 def show_loading_animation():
     """Displays a loading animation (spinner)."""
     animation = ['|', '/', '-', '\\']
-    for _ in range(30):  # Show animation for 30 iterations
+    for _ in range(30):
         for frame in animation:
             sys.stdout.write(f"\rInstalling {frame}   ")
             sys.stdout.flush()
             time.sleep(0.1)
+    print("\n")
 
 def print_logo():
     """Displays a logo for Kali Tools."""
     logo = """
-     _  __   _   _    ___ _____ ___   ___  _    ___ 
-| |/ /  /_\ | |  |_ _|_   _/ _ \ / _ \| |  / __|
-| ' <  / _ \| |__ | |  | || (_) | (_) | |__\__ \
-|_|\_\/_/ \_\____|___|_|_| \___/ \___/|____|___/
-                    |___|                       
-    """
+    
+░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓████████▓▒░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓█▓▒░       ░▒▓███████▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░         ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░        
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░         ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░        
+░▒▓███████▓▒░░▒▓████████▓▒░▒▓█▓▒░      ░▒▓█▓▒░         ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░       ░▒▓██████▓▒░  
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░         ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░             ░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░         ░▒▓█▓▒░  ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░             ░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓█▓▒░         ░▒▓█▓▒░   ░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓████████▓▒░▒▓███████▓▒░  
+                                                                                                                      
+"""
     print(logo)
 
 def main():
     """Main function to execute the setup."""
-    if len(sys.argv) != 3 or sys.argv[1] != "install":
-        print("Usage: sudo kali-tools install <tool_name>")
+    if len(sys.argv) != 2:
+        print("Usage: sudo python3 kali.py <tool_name>")
         return
 
-    tool_name = sys.argv[2]
+    tool_name = sys.argv[1]
 
     # Print the KaliTools logo
     print_logo()
@@ -120,8 +149,14 @@ def main():
     if not install_tool(tool_name):
         print(f"Failed to install {tool_name}.")
         return
+    
+    # Create a desktop entry for the tool
+    if not create_desktop_entry(tool_name):
+        print(f"Failed to create desktop entry for {tool_name}.")
+        return
 
-    print(f"{tool_name} has been installed successfully.")
+    print(f"{tool_name} has been installed and should appear in the application launcher under 'Kali Tools'.")
 
 if __name__ == "__main__":
     main()
+
