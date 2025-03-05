@@ -113,11 +113,19 @@ def print_logo():
 
 def main():
     """Main function to execute the setup."""
-    if len(sys.argv) != 2:
-        print("Usage: sudo python3 kali.py <tool_name>")
-        return
+    if len(sys.argv) < 2:
+    print("Usage: sudo kali-tools install <tool_name>")
+    sys.exit(1)
 
+# Handle both formats
+if sys.argv[1] == "install" and len(sys.argv) == 3:
+    tool_name = sys.argv[2]
+elif len(sys.argv) == 2:
     tool_name = sys.argv[1]
+else:
+    print("Usage: sudo kali-tools install <tool_name>")
+    sys.exit(1)
+
 
     # Print the KaliTools logo
     print_logo()
