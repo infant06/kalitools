@@ -29,7 +29,7 @@ sudo ln -s kali.py /usr/local/bin/kali-tools
 3. Make the script executable:
 
 ```bash
-sudo chmod +x /usr/local/bin/kali-tools
+sudo chmod +x kali.py
 ```
 
 4. Verify that Python 3 is installed:
