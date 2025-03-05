@@ -20,10 +20,10 @@ git clone https://github.com/infant06/kalitools.git
 cd kalitools
 ```
 
-2. Move the script to `/usr/local/bin/` to make it globally accessible:
+2. Make Symlink the script to `/usr/local/bin/` to make it globally accessible:
 
 ```bash
-sudo mv kali.py /usr/local/bin/kali-tools
+sudo ln -s kali.py /usr/local/bin/kali-tools
 ```
 
 3. Make the script executable:
