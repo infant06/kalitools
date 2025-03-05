@@ -59,7 +59,7 @@ def update_packages():
 def install_tool(tool_name):
     """Installs the specified tool from the Kali Linux repository."""
     print(f"Installing {tool_name}...")
-    command = f"sudo apt install -y -t kali-rolling {tool_name}"
+    command = f"sudo apt install -y {tool_name}"
     return run_command(command)
 
 def create_desktop_entry(tool_name):
@@ -75,10 +75,8 @@ Terminal=false
 Type=Application
 Categories=Development;Security;
 """
-    # Create a folder for Kali tools inside the app launcher directory
     app_launcher_dir = "/usr/share/applications/kali_tools"
     os.makedirs(app_launcher_dir, exist_ok=True)
-    
     desktop_path = f"{app_launcher_dir}/{tool_name}.desktop"
     try:
         with open(desktop_path, "w") as f:
@@ -93,7 +91,7 @@ Categories=Development;Security;
 def show_loading_animation():
     """Displays a loading animation (spinner)."""
     animation = ['|', '/', '-', '\\']
-    for _ in range(30):  # Show animation for 30 iterations
+    for _ in range(30):
         for frame in animation:
             sys.stdout.write(f"\rInstalling {frame}   ")
             sys.stdout.flush()
@@ -104,34 +102,22 @@ def print_logo():
     logo = """
      _  __   _   _    ___ _____ ___   ___  _    ___ 
     | |/ /  /_\ | |  |_ _|_   _/ _ \ / _ \| |  / __|
-    | ' <  / _ \| |__ | |  | || (_) | (_) | |__\__ \\
+    | ' <  / _ \| |__ | |  | || (_) | (_) | |__\__ \
     |_|\_\/_/ \_\____|___|_|_| \___/ \___/|____|___/
-                        |___|                       
-
+                        |___|                        
     """
     print(logo)
 
 def main():
     """Main function to execute the setup."""
-    if len(sys.argv) < 2:
-        print("Usage: sudo kali-tools install <tool_name>")
-        sys.exit(1)
+    if len(sys.argv) != 2:
+        print("Usage: sudo python3 kali.py <tool_name>")
+        return
 
-    # Handle both formats: "kali-tools install burpsuite" and "python3 kali.py burpsuite"
-    if sys.argv[1] == "install" and len(sys.argv) == 3:
-        tool_name = sys.argv[2]
-    elif len(sys.argv) == 2:
-        tool_name = sys.argv[1]
-    else:
-        print("Usage: sudo kali-tools install <tool_name>")
-        sys.exit(1)
-
-    # Print the KaliTools logo
+    tool_name = sys.argv[1]
     print_logo()
-    
     print(f"Setting up Kali tools for: {tool_name}")
-    
-    # Check if we need to add the Kali repo (Only do it once)
+
     if not os.path.exists("/etc/apt/sources.list.d/kali.list"):
         if not add_kali_repository():
             print("Failed to add Kali repository.")
@@ -149,15 +135,11 @@ def main():
             print("Failed to update packages.")
             return
 
-    # Show loading animation while installing
     show_loading_animation()
-
-    # Install the requested tool
     if not install_tool(tool_name):
         print(f"Failed to install {tool_name}.")
         return
     
-    # Create a desktop entry for the tool
     if not create_desktop_entry(tool_name):
         print(f"Failed to create desktop entry for {tool_name}.")
         return
